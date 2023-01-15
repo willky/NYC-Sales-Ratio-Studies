@@ -1,1 +1,0 @@
-# NYC-Sales-Ratio-Studies
