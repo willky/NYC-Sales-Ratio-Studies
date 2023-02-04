@@ -59,7 +59,7 @@ While individual properties may experience very different ASRs, the quality of D
 
 The tables below show the median assessment-sales ratio for four property types - 1-3 Family, commercial, large rentals and small rental properties. 
 
-The first tab shows that, overall, DOF's assessment of 1-3 Family homes (Class 1) is the only one that meets the IAAO standards for quality assessment. This makes sense since DOF appraises the values of 1-3 Family properties using comparabale sales method. The other property classes are appraised using other methods which fail to capture true market values.
+The first tab shows that, overall, DOF's assessment of 1-3 Family homes (Class 1) is the only one that meets the IAAO standards for quality assessment. This makes sense since DOF appraises the values of 1-3 Family properties using comparable sales method. The other property classes are appraised using other methods which fail to capture true market values.
 
 ### Citywide Median ASR
 
