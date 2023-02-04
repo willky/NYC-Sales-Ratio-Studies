@@ -259,7 +259,7 @@ count(merge_rentals, TXCL)            #All look good
 
 
 ## 3) TC4 Join
-# Why exclude RES_UNIT?>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Exclude buildings with residential units - we only 100% commercial & offices buildings
 
 merge_TC4 <- 
   inner_join(
@@ -289,11 +289,13 @@ merge_TC4 <- merge_TC4 %>%
 merge_all <- rbind(merge_TC1, merge_rentals, merge_TC4)
 
 
+## Clean environment
+
 rm(merge_TC1, merge_rentals, merge_TC4, rpad, sales_orig,
    rpaddrop, todrop)
 
 
-### Group the tax classes into 4 main categories; 
+### Group the property types into 4 main categories; 
 # 1) 1-3 Family, 2)Small Rentals, 3) Large Rentals, 4) Commercial/Office
 
 count(merge_all, TXCL)
