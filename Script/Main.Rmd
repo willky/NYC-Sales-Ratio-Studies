@@ -1,0 +1,293 @@
+---
+title: "Assessment-Sales Ratio Studies in New York City"
+author: "William Kyeremateng"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  github_document:
+    toc: true
+    df_print: paged
+    fig_width: 10
+    fig_height: 5
+spacing: double
+always_allow_html: true
+---
+
+<style type="text/css">
+  body{
+  font-size: 12pt;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+library(ggthemes)
+library(scales)
+
+attach("/Users/aly_will_mac/Desktop/OLD PC/WILL/LEARNING/R/1. PROJECTS/Sales Ratio Studies/R Environments/objects_all.RData")
+```
+
+![Picture Source: Chicago Tribue(March 16, 2018 publication)](/Users/aly_will_mac/Desktop/OLD PC/WILL/LEARNING/R/1. PROJECTS/Sales Ratio Studies/Cover Page.png){width=100%}
+
+
+## Background
+
+Assessment to sales ratio (ASR) is the ratio a property's  market value as estimated by the city to its actual sales prices. Ideally, the appraised market value for tax purposes should equal the price a property would fetch on the open market if it were put up for sale. A ratio equal to 1 indicates that the assessor had exactly estimated the property’s eventual sales price. In practice, that level of accuracy could only reasonably occur by chance. More often than not, property assessments conducted by counties for tax purposes fail to capture the full market values of properties on a open market. For example, NYC's property tax roll for Fiscal 2019 showed that Chelsea Market  (75 9th Avenue) had a market value of about \$532 million in 2018 in March 2018. However that same year, Google wound up buying the building for almost \$2.4 billion - more than 350% more than NYC's assessed market value.
+
+![Picture Source: The New York Times)](/Users/aly_will_mac/Desktop/OLD PC/WILL/LEARNING/R/1. PROJECTS/Sales Ratio Studies/Chelsea Market.png){width=100%}
+
+The NYC Department of Finance estimates market values using sophisticated models that relate prices of sold properties to unsold properties adjusting for differences in property characteristics. As a result there will invariably be differences between estimates of market value and actual prices. The ASR measures this inaccuracy.
+
+
+Getting the ASR right or wrong has implications not just for individual taxpayers but for how DOF goes about its job and how the property tax is administered more broadly. Previous research show that the valuation method used by DOF to assess the market value of a property affects how close the market value assessed by DOF would be to the true market value. This also affects the taxes levied on a property, as well as the fairness and equity of the property tax system. 
+
+**Goal of the Project**
+
+This project seeks to determine if DOF's property appraisals meet the standards set by the International Association of Assessing Officers (IAAO). Using property sales and assessment data, it estimates the assessment-sale ratio and use it to measure how close DOF's market values are to true market value (sale prices). Additionally, the project evaluates how uniform the assessment-sales ratio are across the City and within groups by calculating the coefficient of dispersion.
+
+
+## Data
+
+This analysis uses the property sales data and property assessment roll from the NYC Department of Finance. The sales data used in this work covers all properties sold from calendar years 2013 to 2018. The property assessment rolls used are from Fiscal 2014 through Fiscal 2019, which correspond to property values as of calendar year 2013 through 2018. This goal is to ensure that DOF's assessed market value and the sale price of a property are from the same year. 
+
+## Median Sales Ratio by Property Type {.tabset .tabset-fade .tabset-pills}
+
+While individual properties may experience very different ASRs, the quality of DOF’s assessment is evaluated in the aggregate using the median value of all ASRs. IAAO standards define a high quality assessment for jurisdictions with a sufficiently large number of property sales—such as New York City— as one where the median ASR lies between 0.90 percent and 1.10 percent.
+
+The tables below show the median assessment-sales ratio for four property types - 1-3 Family, commercial, large rentals and small rental properties. 
+
+The first tab shows that, overall, DOF's assessment of 1-3 Family homes (Class 1) is the only one that meets the IAAO standards for quality assessment. This makes sense since DOF appraises the values of 1-3 Family properties using comparable sales method. The other property classes are appraised using other methods which fail to capture true market values.
+
+### Citywide Median ASR
+
+```{r}
+summary_citywide %>% 
+  select(prop_type, median_asr) %>%
+  mutate(median_asr = round(median_asr, 2)) %>% 
+  pivot_wider(names_from = prop_type,
+              values_from = median_asr) %>% 
+  kbl(align = "lrrrr") %>% 
+  kable_classic_2()
+```
+
+
+### Median ASR by Borough
+
+
+```{r}
+summary_boro %>% 
+  select(Borough, prop_type, median_asr)%>% 
+  mutate(median_asr = round(median_asr, 2)) %>% 
+  pivot_wider(names_from = prop_type,
+              values_from = median_asr) %>% 
+  kbl(align = "lrrrr") %>% 
+  kable_classic_2()
+```
+
+
+### Median ASR by Property Value
+
+
+```{r}
+summary_deciles %>% 
+  select(decile, prop_type, median_asr)%>% 
+  mutate(median_asr = round(median_asr, 2)) %>% 
+  mutate(decile = case_when(decile == 1 ~ "Bottom 10%", decile == 2 ~ "10%-20%", 
+                            decile == 3 ~ "20%-30%", decile == 4 ~ "30%-40%",
+                            decile == 5 ~ "40%-50%", decile == 6 ~ "50%-60%", 
+                            decile == 7 ~ "60%-70%", decile == 8 ~"70%-80%",
+                            decile == 9 ~ "80%-90%", TRUE ~ "Top 10%")) %>% 
+  rename(`Sale Price` = decile) %>% 
+  pivot_wider(names_from = prop_type,
+              values_from = median_asr) %>% 
+  kbl(align = "lrrrr") %>% 
+  kable_classic_2()
+```
+
+#
+
+Even when you compare property types across boroughs or sale values, DOF's assessment of 1-3 Family homes is the only one that meets IAAO standards.^[Caveat – the extremes on the low end may be due to outliers. Proxies for arms-length transactions not perfect. Even so, just looking at the middle 80 percent the trend is there]
+
+
+## Uniformity and Variation of Sales Ratio {.tabset .tabset-fade .tabset-pills}
+
+In addition to getting the median ASR (used to measure the quality of assessments) right, we also care about how the rest of the group is dispersed around the median, and what kind of uniformity exists when looking at properties by other groupings (e.g. value).
+
+The level of uniformity in ASRs is measure using the coefficient of dispersion (COD). The COD measures the variation in assessment around the median ASR. Whereas the ASR measures inaccuracy, the COD measures uniformity. Estimates can be inaccurate — that is, further from market value — but if all properties' assessments are equally inaccurate, then the assessments are perfectly uniform. That is, no one property is benefiting more or less from an inaccuracy than any other property in the same class.
+
+The charts below depict how uniformly the ASRs of properties of the same type are dispersed around the median ASR (red line). The first tab shows the sales ratios among 1-3 Family homes by the sale price. The red line is the median ratio for 1-3 Family home citywide (0.95). Based on IAAO standards, you hope to see a uniform grouping around the median in that 0.9 - 1.1 range. 
+
+
+### 1-3 Family
+
+```{r}
+merge_all %>% 
+  filter(prop_type == "1-3 Family") %>% 
+  ggplot(aes(SALE.PRICE, value.ratio, color = SALE.PRICE, alpha = 0.4)) +
+  geom_point(shape = 16, size = 1, show.legend = FALSE, 
+             position=position_jitter(width=.01,height=.1)) + 
+  theme_economist() +
+  scale_color_gradient(low = "#0091ff", high = "#f0650e", limits = c(0, 5000000)) +
+  scale_x_continuous(name="Sale Price", limits=c(0, 5000000), label = dollar) +
+  scale_y_continuous(name="Sales Ratio", limits=c(0, 2)) +
+  geom_hline(yintercept = median(subset(merge_all, prop_type=="1-3 Family")$value.ratio), color = "Red") +
+  ggtitle("1-3 Family Homes: Sales ratios by sale price")
+```
+
+
+### Commercial/Office
+
+```{r}
+merge_all %>% 
+  filter(prop_type == "Commercial/Office") %>% 
+  ggplot(aes(SALE.PRICE, value.ratio, color = SALE.PRICE, alpha = 0.4)) +
+  geom_point(shape = 16, size = 1, show.legend = FALSE, 
+             position=position_jitter(width=.01,height=.1)) + 
+  theme_economist() +
+  scale_color_gradient(low = "#0091ff", high = "#f0650e", limits = c(0, 10000000)) +
+  scale_x_continuous(name="Sale Price", limits=c(0, 10000000), label = dollar) +
+  scale_y_continuous(name="Sales Ratio", limits=c(0, 2)) +
+  geom_hline(yintercept = median(subset(merge_all, prop_type=="Commercial/Office")$value.ratio),
+             color = "Red") +
+  ggtitle("Commercial/Office: Sales ratios by sale price")
+```
+
+
+### Large Rentals
+
+```{r}
+merge_all %>% 
+  filter(prop_type == "Large Rentals") %>% 
+  ggplot(aes(SALE.PRICE, value.ratio, color = SALE.PRICE, alpha = 0.4)) +
+  geom_point(shape = 16, size = 1, show.legend = FALSE, 
+             position=position_jitter(width=.01,height=.1)) + 
+  theme_economist() +
+  scale_color_gradient(low = "#0091ff", high = "#f0650e", limits = c(0, 25000000)) +
+  scale_x_continuous(name="Sale Price", limits=c(0, 25000000), label = dollar) +
+  scale_y_continuous(name="Sales Ratio", limits=c(0, 2)) +
+  geom_hline(yintercept = median(subset(merge_all, prop_type=="Large Rentals")$value.ratio),
+              color = "Red") +
+  ggtitle("Large Rentals: Sales ratios by sale price")
+```
+
+
+### Small Rentals
+
+```{r}
+merge_all %>% 
+  filter(prop_type == "Small Rentals") %>% 
+  ggplot(aes(SALE.PRICE, value.ratio, color = SALE.PRICE, alpha = 0.4)) +
+  geom_point(shape = 16, size = 1, show.legend = FALSE, 
+             position=position_jitter(width=.01,height=.1)) + 
+  theme_economist() +
+  scale_color_gradient(low = "#0091ff", high = "#f0650e", limits = c(0, 10000000)) +
+  scale_x_continuous(name="Sale Price", limits=c(0, 10000000), label = dollar) +
+  scale_y_continuous(name="Sales Ratio", limits=c(0, 2)) +
+  geom_hline(yintercept = median(subset(merge_all, prop_type=="Small Rentals")$value.ratio),
+              color = "Red") +
+  ggtitle("Small Rentals: Sales ratios by sale price")
+```
+
+#
+
+## Coefficient of Dispersion {.tabset .tabset-fade .tabset-pills}
+
+Per IAAO standards, acceptable CODs fall between 5.0 and 15.0 in areas with relatively homogenous housing.
+
+### Citywide CODs 
+
+```{r}
+summary_citywide %>% 
+  select(prop_type, cod) %>% 
+  mutate(cod = round(cod, 1)) %>% 
+  pivot_wider(names_from = prop_type,
+              values_from = cod) %>% 
+  kbl(align = "lrrrr") %>% 
+  kable_classic_2()
+```
+
+
+### CODs by Borough
+
+```{r}
+summary_boro %>% 
+  select(Borough, prop_type, cod)%>% 
+  mutate(cod = round(cod, 1)) %>% 
+  pivot_wider(names_from = prop_type,
+              values_from = cod) %>% 
+  kbl(align = "lrrrr") %>% 
+  kable_classic_2()
+```
+
+
+### CODs by Property Value
+
+```{r}
+summary_deciles %>% 
+  select(decile, prop_type, cod)%>% 
+  mutate(cod = round(cod, 1)) %>% 
+  mutate(decile = case_when(decile == 1 ~ "Bottom 10%", decile == 2 ~ "10%-20%", 
+                            decile == 3 ~ "20%-30%", decile == 4 ~ "30%-40%",
+                            decile == 5 ~ "40%-50%", decile == 6 ~ "50%-60%", 
+                            decile == 7 ~ "60%-70%", decile == 8 ~"70%-80%",
+                            decile == 9 ~ "80%-90%", TRUE ~ "Top 10%")) %>% 
+  rename(`Sale Price` = decile) %>% 
+  pivot_wider(names_from = prop_type,
+              values_from = cod) %>% 
+  kbl(align = "lrrrr") %>% 
+  kable_classic_2()
+```
+
+#
+
+## Takeaways
+
++ Sales ratios differ greatly between property types and assessment methods.
+
++ Within the same property types, variation is not terrible, though these results are also mixed.
+
++ Regardless of tax class or assessment method, DOF's assessments tend to overvalue lower-value properties.
+
++ Comparing DOF market values between classes should be done with caution.
+
++ Converting to sales-based methods could have big effects on the way the property tax works.
+
+#
+
+## Appendix {.tabset .tabset-fade .tabset-pills}
+
+The tables gives a breakdown of median assessment ratios and coefficients of dispersion by zip code.^[NAs imply there are not any sales in the zip code to calculate Median ASR or COD]1
+
+
+### Median ASR by Zip Code
+
+```{r}
+summary_zip %>% 
+  select(ZIP.CODE, prop_type, median_asr)%>% 
+  mutate(median_asr = round(median_asr, 1)) %>% 
+  pivot_wider(names_from = prop_type,
+              values_from = median_asr) %>% 
+  kbl(align = "lrrrr") %>% 
+  kable_classic_2() %>% 
+  scroll_box(width = "100%", height = "300px")
+```
+
+
+
+### CODs by Zip Code
+
+```{r}
+summary_zip %>% 
+  select(ZIP.CODE, prop_type, cod)%>% 
+  mutate(cod = round(cod, 1)) %>% 
+  pivot_wider(names_from = prop_type,
+              values_from = cod) %>% 
+  kbl(align = "lrrrr") %>% 
+  kable_classic_2() %>% 
+  scroll_box(width = "100%", height = "300px")
+```
+
+
