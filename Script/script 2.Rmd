@@ -1,7 +1,7 @@
 ---
 title: "Assessment-Sales Ratio Studies in New York City"
 author: "William Kyeremateng"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
+date: "August 08, 2020"
 output: 
   html_document:
     theme: cerulean
@@ -30,23 +30,23 @@ library(scales)
 attach("/Users/aly_will_mac/Desktop/OLD PC/WILL/LEARNING/R/1. PROJECTS/Sales Ratio Studies/R Environments/objects_all.RData")
 ```
 
-![Picture Source: Chicago Tribue(March 16, 2018 publication)](/Users/aly_will_mac/Desktop/OLD PC/WILL/LEARNING/1. ALL PROJECTS/NYC-Sales-Ratio-Studies/Cover Page.png){width=100%}
+![Picture Source: Chicago Tribue(March 16, 2018 publication)](/Users/aly_will_mac/Desktop/OLD PC/WILL/LEARNING/1. ALL PROJECTS/NYC-Sales-Ratio-Studies/Images/Cover Page.png){width=100%}
 
 
 ## Background
 
-Assessment to sales ratio (ASR) is the ratio a property's  market value as estimated by the city to its actual sales prices. Ideally, the appraised market value for tax purposes should equal the price a property would fetch on the open market if it were put up for sale. A ratio equal to 1 indicates that the assessor had exactly estimated the property’s eventual sales price. In practice, that level of accuracy could only reasonably occur by chance. More often than not, property assessments conducted by counties for tax purposes fail to capture the full market values of properties on a open market. For example, NYC's property tax roll for Fiscal 2019 showed that Chelsea Market  (75 9th Avenue) had a market value of about \$532 million in 2018 in March 2018. However that same year, Google wound up buying the building for almost \$2.4 billion - more than 350% more than NYC's assessed market value.
+Assessment to sales ratio (ASR) is the ratio of a property's  market value as estimated by the city to its actual sale prices. Ideally, the appraised market value for tax purposes should equal the price a property would fetch on the open market if it were put up for sale. A ratio equal to 1 indicates that the assessor had exactly estimated the property’s eventual sales price. In practice, that level of accuracy could only reasonably occur by chance. More often than not, property assessments conducted by counties for tax purposes fail to capture the full market values of properties on a open market. For example, NYC's property tax roll for Fiscal 2019 showed that Chelsea Market  (75 9th Avenue) had a market value of about \$532 million in March 2018. However, that same year, Google wound up buying the building for almost \$2.4 billion - more than 350% times NYC's assessed market value.
 
-![Picture Source: The New York Times)](/Users/aly_will_mac/Desktop/OLD PC/WILL/LEARNING/1. ALL PROJECTS/NYC-Sales-Ratio-Studies/Chelsea Market.png){width=100%}
+![Picture Source: The New York Times)](/Users/aly_will_mac/Desktop/OLD PC/WILL/LEARNING/1. ALL PROJECTS/NYC-Sales-Ratio-Studies/Images/Chelsea Market.png){width=100%}
 
-The NYC Department of Finance estimates market values using sophisticated models that relate prices of sold properties to unsold properties adjusting for differences in property characteristics. As a result there will invariably be differences between estimates of market value and actual prices. The ASR measures this inaccuracy.
+The NYC Department of Finance estimates market values using sophisticated models that relate prices of sold properties to unsold properties adjusting for differences in property characteristics. As a result, there will invariably be differences between estimates of market value and actual prices. The ASR measures this inaccuracy.
 
 
-Getting the ASR right or wrong has implications not just for individual taxpayers but for how DOF goes about its job and how the property tax is administered more broadly. Previous research show that the valuation method used by DOF to assess the market value of a property affects how close the market value assessed by DOF would be to the true market value. This also affects the taxes levied on a property, as well as the fairness and equity of the property tax system. 
+Getting the ASR right or wrong has implications not just for individual taxpayers but also for how DOF goes about its job and how the property tax is administered more broadly. Previous research show that the valuation method used by DOF to assess the market value of a property affects how close the market value assessed by DOF would be to the true market value. This also affects the taxes levied on a property, as well as the fairness and equity of the property tax system. 
 
 **Goal of the Project**
 
-This project seeks to determine if DOF's property appraisals meet the standards set by the International Association of Assessing Officers (IAAO). Using property sales and assessment data, it estimates the assessment-sale ratio and use it to measure how close DOF's market values are to true market value (sale prices). Additionally, the project evaluates how uniform the assessment-sales ratio are across the City and within groups by calculating the coefficient of dispersion.
+This project seeks to determine if DOF's property appraisals meet the standards set by the International Association of Assessing Officers (IAAO). Using property sales and assessment data, it estimates the assessment-sale ratio and uses it to measure how close DOF's market values are to true market value (sale prices). Additionally, the project evaluates how uniform the assessment-sales ratio are across the City and within groups by calculating the coefficient of dispersion.
 
 
 ## Data

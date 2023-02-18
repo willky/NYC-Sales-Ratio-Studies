@@ -510,4 +510,4 @@ merge_all %>% filter(prop_type == "Commercial/Office") %>%
 
 ## Save objects 
 
-save.image("./R Environments/objects_all.RData")
+save.image("objects_all.RData")
