@@ -1,7 +1,7 @@
 ---
 title: "Assessment-Sales Ratio Studies in New York City"
 author: "William Kyeremateng"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
+date: "August 20, 2020"
 output: 
   html_document:
     theme: cerulean
@@ -18,7 +18,7 @@ spacing: double
 </style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
                       fig.width = 10, fig.height = 5, fig.align = "center")
 
 library(knitr)
@@ -46,12 +46,80 @@ Getting the ASR right or wrong has implications not just for individual taxpayer
 
 **Goal of the Project**
 
-This project seeks to determine if DOF's property appraisals meet the standards set by the International Association of Assessing Officers (IAAO). Using property sales and assessment data, it estimates the assessment-sale ratio and uses it to measure how close DOF's market values are to true market value (sale prices). Additionally, the project evaluates how uniform the assessment-sales ratio are across the City and within groups by calculating the coefficient of dispersion.
+This project seeks to determine if DOF's property appraisals meet the standards set by the International Association of Assessing Officers (IAAO). Using property sales and assessment data, it estimates the assessment-sale ratio and uses it to measure how close DOF's market values are to true market value (sale prices). Additionally, the analysis evaluates how uniform the assessment-sales ratio are across the City and within groups by calculating the coefficient of dispersion.
 
 
-## Data
+This study focuses only on four property types, namely `1-3 family homes`, `commercial properties`, `small rentals` (those with 4-6 units), and `large rentals` (those with more than 6 units).
 
-This analysis uses the property sales data and property assessment roll from the NYC Department of Finance. The sales data used in this work covers all properties sold from calendar years 2013 to 2018. The property assessment rolls used are from Fiscal 2014 through Fiscal 2019, which correspond to property values as of calendar year 2013 through 2018. This goal is to ensure that DOF's assessed market value and the sale price of a property are from the same year. 
+## Data 
+
+This analysis uses the property `sales` data and the `real property assessment (RPAD)` data from the NYC Department of Finance. The `sales` data is a record all properties sold in the City and includes such information as the property address, sale price, transaction date, property type, etc. RPAD, on the other hand, contains information about the City's property valuation for tax purposes. it includes such details as market value, assessed value, property location and physical attributes, amon others.  
+
+The sales data used in this work covers all properties sold from calendar years 2013 to 2018. The property assessment rolls used are from Fiscal 2014 through Fiscal 2019, which correspond to property values as of calendar year 2013 through 2018. The two data sets were joined in order to obtain DOF's assessed values  for the sold properties. The objective is to ensure that DOF's assessed market value and the sale price of a property are from the same year. 
+
+
+### Data Cleaning
+
+The annualized sales data were downloaded in csv format from DOF's website, and loaded into R. The RPAD data were downloaded in text format and converted to SPSS, before exporting to R.
+
+Once loaded to R, I cleaned and manipulated the data to get it ready for the analysis. Below are some of the major cleaning steps performed in this analysis.
+
+1. **Removing Unwanted Columns:** Six columns were dropped from the `sales` data while 94 columns were dropped from `RPAD` data.
+
+2. **Excluding Non-Arms Length Transaction:** The `sales` data records all property transactions, including arms length and non-arms length transactions. As a result, it includes transactions with sale prices as low as zero dollars. For the purpose of this study, I remove all non-arms length transactions. For 1-3 family home and rentals, I dropped transactions with sale prices under \$10,000. For commercial properties, since they tend to be more expensive, I excluded those with sale prices under \$30,000.  While the thresholds used in this case are not perfect,  they ensures that the study is conducted using transactions that were  
+
+3. **Removing Unwanted Property Types:** Since the analysis focuses on 1-3 family homes, commercial properties and rentals, I dropped all other property types including coops, condos, vacant land, etc.
+
+4. **Merging the two datasets:** After cleaning, the `sales` and `RPAD` data sets were joined to ensure based on property type.
+
+5. **Calculate ASRs and CODs:** Once the final data is cleaned and ready, I calculate the assessment-sales ratio (ASR) and coefficient of dispersion (COD) across boroughs for the four property types under consideration. The ASRs and CODs are assessed across boroughs, property types and property values to determine where inefficiencies exist and how uneven they are.
+
+
+For details of the data cleaning and manipulation, take a look at the R Script in this [GitHub repository](https://github.com/willky/NYC-Sales-Ratio-Studies/blob/main/Script/script%201.R)
+
+### Data Size {.tabset .tabset-fade .tabset-pills}
+
+The final data, after cleaning and wrangling, used for this analysis included \42,975 observations and 49 columns. Note that each observation represents a transaction and not a property. Hence, information for one property may be recorded more than once if it sold multiple times over the years under consideration.
+
+Below is a breakdown of the number of transactions by property type, and by borough.
+
+
+#### No. of Transactions by Property Type
+
+```{r}
+summary_citywide %>% 
+  select(1:2) %>% 
+  ggplot(aes(x = prop_type, y = N)) +
+  geom_bar(position='dodge', fill = '#ff9149', stat='identity') +
+  scale_y_continuous(labels = comma) +
+  geom_text(aes(label = comma(N, size = 20))) +
+  theme_economist() +
+  theme(panel.grid.major = element_blank()) +
+  labs(x = NULL,
+       y = "No. of Transactions",
+       title = "Number of Transactions by Property Type")
+```
+
+
+#### No. of Transactions by Borough
+
+```{r}
+summary_boro %>% 
+  select(1,3) %>% 
+  group_by(Borough) %>% 
+  summarise(N = sum(N)) %>% 
+  ggplot(aes(x = Borough, y = N)) +
+  geom_bar(position='dodge', fill = '#ff9149', stat='identity') +
+  scale_y_continuous(labels = comma) +
+  geom_text(aes(label = comma(N, size = 20))) +
+  theme_economist() +
+  theme(panel.grid.major = element_blank()) +
+  labs(x = NULL,
+       y = "No. of Transactions",
+       title = "Number of Transactions by Borough")
+```
+
+
 
 ## Median Sales Ratio by Property Type {.tabset .tabset-fade .tabset-pills}
 
